@@ -86,6 +86,8 @@ npm run desktop:make
 
 Electron Forge writes build artifacts under `apps/desktop/out/`.
 
+See [docs/desktop-build-guide.md](docs/desktop-build-guide.md) for the full Windows desktop development, packaging, first-run setup, backup, and troubleshooting guide.
+
 ## Backups
 
 The app can export a copy of the SQLite database to a local backup folder. Operators should copy backup files to an external drive regularly.
@@ -121,4 +123,3 @@ docs/        architecture and operator notes
 ## License
 
 MIT
-

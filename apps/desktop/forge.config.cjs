@@ -9,6 +9,7 @@ module.exports = {
       { from: "../api/dist", to: "api/dist" },
       { from: "../api/prisma", to: "api/prisma" },
       { from: "../api/scripts", to: "api/scripts" },
+      { from: "../api/node_modules", to: "api/node_modules" },
       { from: "../web/dist", to: "web/dist" },
       { from: "../../node_modules", to: "node_modules" }
     ]
