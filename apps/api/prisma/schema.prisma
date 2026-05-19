@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  fullName     String
+  passwordHash String
+  roleName     String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  auditLogs    AuditLog[]
+
+  @@index([roleName])
+}
+
+model FacilityProfile {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  phone     String?
+  logoPath  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id             String      @id @default(cuid())
+  patientNumber  String      @unique
+  firstName      String
+  middleName     String?
+  lastName       String
+  sex            String
+  dateOfBirth    DateTime?
+  ageYears       Int?
+  phone          String?
+  address        String?
+  nextOfKinName  String?
+  nextOfKinPhone String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  encounters     Encounter[]
+
+  @@index([lastName, firstName])
+  @@index([phone])
+}
+
+model Encounter {
+  id              String          @id @default(cuid())
+  visitNumber     String          @unique
+  patientId       String
+  status          String          @default("ARRIVED")
+  openedAt        DateTime        @default(now())
+  readyForDoctorAt DateTime?
+  closedAt        DateTime?
+  patient         Patient         @relation(fields: [patientId], references: [id])
+  triage          TriageRecord?
+  consultation    Consultation?
+  labOrders       LabOrder[]
+  prescriptions   Prescription[]
+  invoices        Invoice[]
+
+  @@index([status, openedAt])
+  @@index([patientId, openedAt])
+}
+
+model TriageRecord {
+  id               String   @id @default(cuid())
+  encounterId      String   @unique
+  temperature      Float?
+  systolicBp       Int?
+  diastolicBp      Int?
+  pulse            Int?
+  respiratoryRate  Int?
+  oxygenSaturation Int?
+  weightKg         Float?
+  painScore        Int?
+  chiefComplaint   String
+  suggestedPriority String
+  priority         String
+  completedAt      DateTime @default(now())
+  encounter        Encounter @relation(fields: [encounterId], references: [id])
+}
+
+model Consultation {
+  id                           String       @id @default(cuid())
+  encounterId                  String       @unique
+  historyOfPresentingComplaint String?
+  examinationFindings          String?
+  diagnosisText                String?
+  treatmentPlan                String?
+  clinicalNotes                String?
+  status                       String       @default("IN_PROGRESS")
+  startedAt                    DateTime     @default(now())
+  completedAt                  DateTime?
+  encounter                    Encounter    @relation(fields: [encounterId], references: [id])
+  diagnoses                    Diagnosis[]
+  labOrders                    LabOrder[]
+  prescriptions                Prescription[]
+}
+
+model Diagnosis {
+  id             String       @id @default(cuid())
+  consultationId String
+  code           String?
+  description    String
+  createdAt      DateTime     @default(now())
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+}
+
+model LabOrder {
+  id             String       @id @default(cuid())
+  encounterId    String
+  consultationId String?
+  testName       String
+  status         String       @default("PENDING")
+  orderedAt      DateTime     @default(now())
+  completedAt    DateTime?
+  encounter      Encounter    @relation(fields: [encounterId], references: [id])
+  consultation   Consultation? @relation(fields: [consultationId], references: [id])
+  result         LabResult?
+
+  @@index([status, orderedAt])
+}
+
+model LabResult {
+  id           String   @id @default(cuid())
+  labOrderId   String   @unique
+  resultText   String
+  completedBy  String?
+  completedAt  DateTime @default(now())
+  labOrder     LabOrder @relation(fields: [labOrderId], references: [id])
+}
+
+model Medication {
+  id             String             @id @default(cuid())
+  name           String
+  genericName    String?
+  form           String?
+  strength       String?
+  unitPriceCents Int                @default(0)
+  active         Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  prescriptionItems PrescriptionItem[]
+
+  @@index([name])
+  @@index([genericName])
+}
+
+model Prescription {
+  id             String             @id @default(cuid())
+  encounterId    String
+  consultationId String?
+  status         String             @default("PENDING")
+  createdAt      DateTime           @default(now())
+  dispensedAt    DateTime?
+  encounter      Encounter          @relation(fields: [encounterId], references: [id])
+  consultation   Consultation?      @relation(fields: [consultationId], references: [id])
+  items          PrescriptionItem[]
+}
+
+model PrescriptionItem {
+  id                  String       @id @default(cuid())
+  prescriptionId      String
+  medicationId        String?
+  medicineNameSnapshot String
+  dosage              String
+  route               String?
+  frequency           String
+  duration            String
+  quantity            Int
+  instructions        String?
+  dispensedQuantity   Int          @default(0)
+  status              String       @default("PENDING")
+  prescription        Prescription @relation(fields: [prescriptionId], references: [id])
+  medication          Medication?  @relation(fields: [medicationId], references: [id])
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  invoiceNo   String        @unique
+  encounterId String
+  status      String        @default("UNPAID")
+  totalCents  Int           @default(0)
+  createdAt   DateTime      @default(now())
+  paidAt      DateTime?
+  encounter   Encounter     @relation(fields: [encounterId], references: [id])
+  items       InvoiceItem[]
+  payments    Payment[]
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Int     @default(1)
+  unitCents   Int
+  totalCents  Int
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  amountCents Int
+  method      String   @default("CASH")
+  reference   String?
+  receivedAt  DateTime @default(now())
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  details    String?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id])
+
+  @@index([action, createdAt])
+  @@index([entityType, entityId])
+}

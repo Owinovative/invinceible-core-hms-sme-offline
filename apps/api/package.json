@@ -1,0 +1,42 @@
+{
+  "name": "@invinceible/sme-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "node scripts/prisma-cli.cjs generate --schema prisma/schema.prisma && nest build",
+    "start": "node dist/main.js",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "db:migrate": "node scripts/prisma-cli.cjs generate --schema prisma/schema.prisma && node scripts/init-db.cjs",
+    "db:deploy": "node scripts/prisma-cli.cjs migrate deploy --schema prisma/schema.prisma",
+    "db:push": "node scripts/prisma-cli.cjs generate --schema prisma/schema.prisma && node scripts/init-db.cjs",
+    "db:seed": "node scripts/seed.cjs"
+  },
+  "dependencies": {
+    "@invinceible/sme-shared": "0.1.0",
+    "@nestjs/common": "^10.4.15",
+    "@nestjs/core": "^10.4.15",
+    "@nestjs/platform-express": "^10.4.15",
+    "@prisma/client": "6.2.1",
+    "bcryptjs": "^2.4.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "dotenv": "^16.4.7",
+    "jsonwebtoken": "^9.0.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.9",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.10.5",
+    "prisma": "6.2.1",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

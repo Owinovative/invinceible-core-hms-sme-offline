@@ -1,0 +1,30 @@
+{
+  "name": "invinceible-core-hms-sme-offline",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Offline-first Electron desktop HMS for small clinics, dispensaries, and single-computer installations.",
+  "license": "MIT",
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "apps/desktop",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web \"npm --workspace apps/api run dev\" \"npm --workspace apps/web run dev\"",
+    "build": "npm --workspace packages/shared run build && npm --workspace apps/api run build && npm --workspace apps/web run build && npm --workspace apps/desktop run build",
+    "test": "npm --workspace packages/shared test && npm --workspace apps/api test && npm --workspace apps/web test",
+    "lint": "npm --workspace apps/api run lint && npm --workspace apps/web run lint && npm --workspace apps/desktop run lint",
+    "db:migrate": "npm --workspace apps/api run db:migrate",
+    "db:seed": "npm --workspace apps/api run db:seed",
+    "desktop:dev": "npm --workspace apps/desktop run start",
+    "desktop:package": "npm --workspace apps/desktop run package",
+    "desktop:make": "npm --workspace apps/desktop run make"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  }
+}
+
